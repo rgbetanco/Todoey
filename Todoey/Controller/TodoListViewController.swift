@@ -12,12 +12,12 @@ class TodoListViewController: UITableViewController {
     
     var itemArray  = [Item]()
     
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Item.plist")
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        let item = Item()
-        item.title = "Find Mike"
-        itemArray.append(item)
-        
+
+        loadItems()
     }
     
     //MARK - Tableview datasource methods
@@ -35,6 +35,9 @@ class TodoListViewController: UITableViewController {
         } else {
             cell.accessoryType = .none
         }
+        
+        saveItems()
+        
         return cell
     }
     
@@ -58,7 +61,7 @@ class TodoListViewController: UITableViewController {
                 item.title = txt
                 
                 self.itemArray.append(item)
-                
+                self.saveItems()
             }
             self.tableView.reloadData()
         }
@@ -68,6 +71,30 @@ class TodoListViewController: UITableViewController {
         }
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
+    }
+    
+    //MARK - saveItems
+    
+    func saveItems(){
+        let encoder = PropertyListEncoder()
+    
+        do {
+        let data = try encoder.encode(self.itemArray)
+        try data.write(to: self.dataFilePath!)
+        } catch {
+        print("Error encoding item array, \(error)")
+        }
+    }
+    
+    func loadItems(){
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+                itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("\(error)")
+            }
+        }
     }
     
 }
