@@ -7,16 +7,18 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class CategoryViewController: UITableViewController {
+    
+    let realm = try! Realm()
 
     var categoryArray  = [Category]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadCategories()
+     //   loadCategories()
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -27,7 +29,7 @@ class CategoryViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
         cell.textLabel?.text = categoryArray[indexPath.row].name
         
-        saveCategory()
+       // saveCategory()
         
         return cell
     }
@@ -47,7 +49,7 @@ class CategoryViewController: UITableViewController {
         
     }
 
-    
+   /*
     func loadCategories(with request : NSFetchRequest<Category> = Category.fetchRequest()){
         do {
             categoryArray = try context.fetch(request)
@@ -56,10 +58,12 @@ class CategoryViewController: UITableViewController {
         }
         tableView.reloadData()
     }
-    
-    func saveCategory(){
+    */
+    func save(category: Category){
         do {
-            try context.save()
+            try realm.write{
+                    realm.add(category)
+            }
         } catch {
             print("Error encoding item array, \(error)")
         }
@@ -72,10 +76,10 @@ class CategoryViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Category", style: .default) { (action) in
             //what will happen once the user clicks the add item button on our uialert
             if let txt = textField.text {
-                let category = Category(context: self.context)
-                category.name = txt
-                self.categoryArray.append(category)
-                self.saveCategory()
+                let newCategory = Category()
+                newCategory.name = txt
+                self.categoryArray.append(newCategory)
+                self.save(category: newCategory)
             }
             self.tableView.reloadData()
         }
